@@ -1,6 +1,7 @@
 import java.awt.BorderLayout;
 import java.awt.Toolkit;
 import java.awt.event.ActionEvent;
+import java.awt.event.MouseListener;
 import java.io.*;
 import java.util.ArrayList;
 import java.util.List;
@@ -25,11 +26,13 @@ public class MainFrame extends JFrame {
     private JCheckBoxMenuItem showAxisMenuItem;
     private JCheckBoxMenuItem showMarkersMenuItem;
     private JCheckBoxMenuItem showPolygonsMenuItem;
+    private JCheckBoxMenuItem SaveMenuItem;
     private JCheckBoxMenuItem rotateMenuItem;
     // Компонент-отображатель графика
     private GraphicsDisplay display = new GraphicsDisplay();
     // Флаг, указывающий на загруженность данных графика
     private boolean fileLoaded = false;
+
 
     public MainFrame() {
 // Вызов конструктора предка Frame
@@ -114,6 +117,29 @@ public class MainFrame extends JFrame {
         graphicsMenu.add(rotateMenuItem);
 
 
+        Action saveAction = new AbstractAction("Сохранить текущую версию графика") {
+            public void actionPerformed(ActionEvent event) {
+                if (fileChooser==null) {
+// Если экземпляр диалогового окна
+// "Открыть файл" ещѐ не создан,
+// то создать его
+                    fileChooser = new JFileChooser();
+// и инициализировать текущей директорией
+                    fileChooser.setCurrentDirectory(new File("."));
+                }
+// Показать диалоговое окно
+                if (fileChooser.showSaveDialog(MainFrame.this) ==
+                        JFileChooser.APPROVE_OPTION);
+// Если результат его показа успешный,
+// сохранить данные в двоичный файл
+                display.saveGraphicToFile(fileChooser.getSelectedFile());
+            }
+
+        };
+// Добавить соответствующий элемент в меню
+        graphicsMenu.add(saveAction);
+
+
 // Зарегистрировать обработчик событий, связанных с меню "График"
         graphicsMenu.addMenuListener(new GraphicsMenuListener());
 // Установить GraphicsDisplay в цент граничной компоновки
@@ -194,6 +220,7 @@ public class MainFrame extends JFrame {
             showMarkersMenuItem.setEnabled(fileLoaded);
             showPolygonsMenuItem.setEnabled(fileLoaded);
             rotateMenuItem.setEnabled(fileLoaded);
+
         }
         // Обработчик, вызываемый после того, как меню исчезло с экрана
         public void menuDeselected(MenuEvent e) {
